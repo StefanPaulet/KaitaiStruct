@@ -34,6 +34,52 @@ struct Token {
 
   auto operator<=>(Token const& other) const = default;
 
+  friend auto operator<<(std::ostream& os, Token const& t) -> std::ostream& {
+    switch (t.type) {
+      case TokenType::Identifier: {
+        os << std::format("'Identifier: {}'", std::get<std::string>(t.value.value()));
+        break;
+      }
+      case TokenType::Space: {
+        os << "<whitspace>";
+        break;
+      }
+      case TokenType::Tab: {
+        os << "<tab>";
+        break;
+      }
+      case TokenType::NewLine: {
+        os << "<newline>";
+        break;
+      }
+      case TokenType::Dash: {
+        os << "'-'";
+        break;
+      }
+      case TokenType::Colon: {
+        os << "':'";
+        break;
+      }
+      case TokenType::Meta: {
+        os << "'meta'";
+        break;
+      }
+      case TokenType::Id: {
+        os << "'id'";
+        break;
+      }
+      case TokenType::Seq: {
+        os << "'seq'";
+        break;
+      }
+      case TokenType::Type: {
+        os << "'type'";
+        break;
+      }
+    }
+    return os;
+  }
+
   TokenType type;
   std::optional<TokenValue> value;
 };

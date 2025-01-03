@@ -30,7 +30,7 @@ auto Lexer::operator()() -> std::optional<Token> {
       return Token{Dash};
     }
     default: {
-      throw exceptions::UnknownSymbolException{_input.front()};
+      return std::nullopt;
     }
   }
 }
@@ -81,7 +81,7 @@ auto Lexer::handleWhitespace() -> std::optional<Token> {
       return Token{NewLine};
     }
     default: {
-      assert(false && "Unhandled whitespace symbol");
+      return std::nullopt;
     }
   }
 }
