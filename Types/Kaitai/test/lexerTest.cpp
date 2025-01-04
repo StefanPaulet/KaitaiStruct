@@ -7,6 +7,7 @@
 
 namespace {
 using namespace kaitai::testing;
+using namespace kaitai::exceptions;
 } // namespace
 
 TEST(LexerTest, Blank) {
@@ -73,4 +74,13 @@ seq:
         tab, id, colon, blank, identifier("gif"), newline,
         seq, colon, newline,
         tab, dash, blank, type, colon, blank, identifier("header"), newline}));
+}
+
+TEST(LexerTest, UnknownSymbol) {
+  Lexer lexer{"$"};
+  try {
+    lexer();
+  } catch (UnknownSymbolException const& e) {
+    ASSERT_EQ(std::string_view(e.what()), "Unknown symbol '$'");
+  }
 }

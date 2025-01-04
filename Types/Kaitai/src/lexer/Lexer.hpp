@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../token/Token.hpp"
+#include "Exceptions.hpp"
 
 namespace kaitai::detail {
 
