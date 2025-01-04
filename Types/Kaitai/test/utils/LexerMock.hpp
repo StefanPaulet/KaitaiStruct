@@ -4,9 +4,10 @@
 
 #pragma once
 
-#include <kaitai/Lexer>
-#include <deque>
 #include <iostream>
+#include <kaitai/Lexer>
+#include <span>
+#include <vector>
 
 namespace kaitai::testing {
 using kaitai::detail::Token;
@@ -27,23 +28,29 @@ constexpr auto seq = Token{Seq};
 constexpr auto type = Token{Type};
 constexpr auto identifier = [](TokenValue const& value) { return Token{Identifier, value}; };
 
-using TokenStream = std::deque<Token>;
+using TokenStream = std::vector<Token>;
 
-auto compareTokens(std::string&& string, TokenStream&& stream) -> bool {
-  Lexer lexer {std::move(string)};
+auto compareTokens(Lexer& lexer, TokenStream const& stream) -> bool {
+  std::span remaining{stream.begin(), stream.size()};
   for (auto token = lexer(); token.has_value(); token = lexer()) {
-    if (stream.empty()) {
+    if (remaining.empty()) {
       std::cout << std::format("Found token '{}', but expected none\n", token.value());
       return false;
     }
-    if (token != stream.front()) {
-      std::cout << std::format("Expected token '{}', but found '{}' instead\n", stream.front(), token.value());
+    if (token != remaining.front()) {
+      std::cout << std::format("Expected token '{}', but found '{}' instead\n", remaining.front(), token.value());
+      if (auto matchCount = stream.size() - remaining.size(); matchCount != 0) {
+        std::cout << "Following tokens matched:\n";
+        for (auto const& matched : std::span{stream.begin(), matchCount}) {
+          std::cout << std::format("{}\n", matched);
+        }
+      }
       return false;
     }
-    stream.pop_front();
+    remaining = remaining.subspan(1, remaining.size() - 1);
   }
-  if (!stream.empty()) {
-    std::cout << std::format("Still expecting tokens (front is '{}'), but found none\n", stream.front());
+  if (!remaining.empty()) {
+    std::cout << std::format("Still expecting tokens (front is '{}'), but found none\n", remaining.front());
     return false;
   }
 
