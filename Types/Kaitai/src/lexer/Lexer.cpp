@@ -86,4 +86,8 @@ auto Lexer::handleWhitespace() -> std::optional<Token> {
   }
 }
 
+auto Lexer::input(std::string&& string) -> void {
+  _str = std::string(_input) + std::move(string);
+  _input = _str;
+}
 } // namespace kaitai::detail

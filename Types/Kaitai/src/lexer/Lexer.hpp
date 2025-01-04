@@ -13,6 +13,7 @@ class Lexer {
 public:
   explicit Lexer(std::string&& string);
   auto operator()() -> std::optional<Token>;
+  auto input(std::string&& newString) -> void;
 
 private:
   static auto isAlpha(char chr) {

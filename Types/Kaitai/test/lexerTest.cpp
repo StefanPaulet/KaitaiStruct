@@ -84,3 +84,10 @@ TEST(LexerTest, UnknownSymbol) {
     ASSERT_EQ(std::string_view(e.what()), "Unknown symbol '$'");
   }
 }
+
+TEST(LexerTest, ContinuousInput) {
+  Lexer lexer{"id: meta"};
+  ASSERT_TRUE(compareTokens(lexer, TokenStream{id, colon, blank}));
+  lexer.input("l\n");
+  ASSERT_TRUE(compareTokens(lexer, TokenStream{identifier("metal"), newline}));
+}
