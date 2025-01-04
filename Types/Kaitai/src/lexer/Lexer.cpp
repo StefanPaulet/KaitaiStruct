@@ -68,7 +68,7 @@ auto Lexer::handleWhitespace() -> std::optional<Token> {
       _input.remove_prefix(1);
       return Token{Tab};
     }
-    return Token{Space};
+    return Token{Blank};
   }
 
   switch (_input.front()) {

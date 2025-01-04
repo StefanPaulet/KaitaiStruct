@@ -4,6 +4,14 @@ set(CMAKE_CXX_STANDARD 20)
 
 project(kaitaiStruct)
 
-add_executable(main
-        src/main.cpp
-        src/lexer/Lexer.cpp)
+add_library(KaitaiStruct
+    STATIC
+    src/lexer/Lexer.cpp)
+
+add_executable(main src/main.cpp)
+
+target_link_libraries(main KaitaiStruct)
+
+target_include_directories(main PRIVATE include)
+
+add_subdirectory(test)
