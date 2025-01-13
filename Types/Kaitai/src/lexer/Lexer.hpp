@@ -5,7 +5,7 @@
 #pragma once
 
 #include "../token/Token.hpp"
-#include "Exceptions.hpp"
+#include "LexerExceptions.hpp"
 
 namespace kaitai::detail {
 
@@ -16,38 +16,30 @@ public:
   auto input(std::string&& newString) -> void;
 
 private:
-  static auto isAlpha(char chr) {
-    return chr >= 'a' && chr <= 'z' || chr >= 'A' && chr <= 'Z' || chr == '_';
-  }
+  static auto isAlpha(char chr) -> bool;
 
-  static auto isDigit(char chr) {
-    return chr >= '0' && chr <= '9';
-  }
+  static auto isDigit(char chr) -> bool;
 
-  static auto isAlphaNum(char chr) {
-    return isAlpha(chr) || isDigit(chr);
-  }
+  static auto isAlphaNum(char chr) -> bool;
 
-  static auto isWhitespace(char chr) {
-    return chr == ' ' || chr == '\t' || chr == '\n' || chr == '\r';
-  }
+  static auto isWhitespace(char chr) -> bool;
 
   template <typename Pred>
-  auto consumeWhile(Pred&& pred) -> std::optional<std::string_view> {
+  static auto consumeWhile(std::string_view input, Pred&& pred) -> std::tuple<std::string_view, std::optional<std::string_view>> {
     unsigned int idx = 0;
-    while (idx != _input.size() && std::invoke(std::forward<Pred>(pred), _input[idx])) {
+    while (idx != input.size() && std::invoke(std::forward<Pred>(pred), input[idx])) {
       ++idx;
     }
-    if (idx == _input.size()) {
-      return std::nullopt;
+    if (idx == input.size()) {
+      return {input, std::nullopt};
     }
-    auto retVal = _input.substr(0, idx);
-    _input.remove_prefix(idx);
-    return retVal;
+    auto retVal = input.substr(0, idx);
+    input.remove_prefix(idx);
+    return {input, retVal};
   }
 
-  auto handleAlphaNum() -> std::optional<Token>;
-  auto handleWhitespace() -> std::optional<Token>;
+  static auto handleAlphaNum(std::string_view input) -> std::tuple<std::string_view, std::optional<Token>>;
+  static auto handleWhitespace(std::string_view input) -> std::tuple<std::string_view, std::optional<Token>>;
 
   std::string _str;
   std::string_view _input;
