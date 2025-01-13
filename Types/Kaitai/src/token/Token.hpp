@@ -42,14 +42,14 @@ struct Token {
 
 
 template <> struct std::formatter<kaitai::detail::Token> {
-  bool quoted = false;
-
   constexpr auto parse(auto& ctx) {
     auto it = ctx.begin();
-    if (it == ctx.end())
+    if (it == ctx.end()) {
       return it;
-    if (it != ctx.end() && *it != '}')
+    }
+    if (it != ctx.end() && *it != '}') {
       throw std::format_error("Invalid format args for Token.");
+    }
 
     return it;
   }

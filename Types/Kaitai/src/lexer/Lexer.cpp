@@ -13,10 +13,14 @@ auto Lexer::operator()() -> std::optional<Token> {
   }
 
   if (isAlphaNum(_input.front())) {
-    return handleAlphaNum();
+    std::optional<Token> token;
+    std::tie(_input, token) = handleAlphaNum(_input);
+    return token;
   }
   if (isWhitespace(_input.front())) {
-    return handleWhitespace();
+    std::optional<Token> token;
+    std::tie(_input, token) = handleWhitespace(_input);
+    return token;
   }
 
   switch (_input.front()) {
@@ -35,50 +39,50 @@ auto Lexer::operator()() -> std::optional<Token> {
   }
 }
 
-auto Lexer::handleAlphaNum() -> std::optional<Token> {
-  auto tokenStr = consumeWhile(isAlphaNum);
+auto Lexer::handleAlphaNum(std::string_view input) -> std::tuple<std::string_view, std::optional<Token>> {
+  auto [result, tokenStr] = consumeWhile(input, isAlphaNum);
   if (tokenStr.has_value()) {
     using enum TokenType;
     auto val = tokenStr.value();
     if (val == "meta") {
-      return Token{Meta};
+      return {result, Token{Meta}};
     }
     if (val == "id") {
-      return Token{Id};
+      return {result, Token{Id}};
     }
     if (val == "seq") {
-      return Token{Seq};
+      return {result, Token{Seq}};
     }
     if (val == "type") {
-      return Token{Type};
+      return {result, Token{Type}};
     }
-    return Token{Identifier, std::string{val}};
+    return {result, Token{Identifier, std::string{val}}};
   }
-  return std::nullopt;
+  return {result, std::nullopt};
 }
 
-auto Lexer::handleWhitespace() -> std::optional<Token> {
+auto Lexer::handleWhitespace(std::string_view input) -> std::tuple<std::string_view, std::optional<Token>> {
   using enum TokenType;
-  if (_input.front() == ' ') {
-    _input.remove_prefix(1);
-    if (_input.empty()) {
-      return std::nullopt;
+  if (input.front() == ' ') {
+    input.remove_prefix(1);
+    if (input.empty()) {
+      return {input, std::nullopt};
     }
-    if (_input.front() == ' ') {
-      _input.remove_prefix(1);
-      return Token{Tab};
+    if (input.front() == ' ') {
+      input.remove_prefix(1);
+      return {input, Token{Tab}};
     }
-    return Token{Blank};
+    return {input, Token{Blank}};
   }
 
-  switch (_input.front()) {
+  switch (input.front()) {
     case '\t': {
-      _input.remove_prefix(1);
-      return Token{Tab};
+      input.remove_prefix(1);
+      return {input, Token{Tab}};
     }
     case '\n': {
-      _input.remove_prefix(1);
-      return Token{NewLine};
+      input.remove_prefix(1);
+      return {input, Token{NewLine}};
     }
     default: {
       assert(false && "Unhandled whitespace symbol");
@@ -89,5 +93,22 @@ auto Lexer::handleWhitespace() -> std::optional<Token> {
 auto Lexer::input(std::string&& string) -> void {
   _str = std::string(_input) + std::move(string);
   _input = _str;
+}
+
+
+auto Lexer::isAlpha(char chr) -> bool {
+  return chr >= 'a' && chr <= 'z' || chr >= 'A' && chr <= 'Z' || chr == '_';
+}
+
+auto Lexer::isDigit(char chr) -> bool {
+  return chr >= '0' && chr <= '9';
+}
+
+auto Lexer::isAlphaNum(char chr) -> bool {
+  return isAlpha(chr) || isDigit(chr);
+}
+
+auto Lexer::isWhitespace(char chr) -> bool {
+  return chr == ' ' || chr == '\t' || chr == '\n' || chr == '\r';
 }
 } // namespace kaitai::detail
