@@ -11,6 +11,7 @@ namespace kaitai::detail {
 
 class Lexer {
 public:
+  Lexer();
   explicit Lexer(std::string&& string);
   auto operator()() -> std::optional<Token>;
   auto input(std::string&& newString) -> void;

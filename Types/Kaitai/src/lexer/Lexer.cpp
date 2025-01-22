@@ -5,10 +5,12 @@
 #include "Lexer.hpp"
 
 namespace kaitai::detail {
+Lexer::Lexer() = default;
+
 Lexer::Lexer(std::string&& string) : _str{std::move(string)}, _input{_str} {}
 
 auto Lexer::operator()() -> std::optional<Token> {
-  if (_input.empty()) {
+  if (_input.empty() || _input.front() == '\0') {
     return std::nullopt;
   }
 
