@@ -21,4 +21,10 @@ class EndOfStreamException : public detail::Exception {
 public:
   EndOfStreamException() : Exception("Stream terminated") {}
 };
+
+class UnknownEndianException : public detail::Exception {
+public:
+  explicit UnknownEndianException(std::string endianess) :
+    Exception(std::format("Unknown endianness {}", endianess)) {}
+};
 } // kaitai::exceptions

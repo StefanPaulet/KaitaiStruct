@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "meta/Meta.hpp"
+#include "Meta.hpp"
 
 namespace kaitai::detail {
 

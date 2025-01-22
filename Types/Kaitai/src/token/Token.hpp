@@ -25,17 +25,27 @@ enum class TokenType {
   Meta,
   Id,
   Seq,
-  Type
+  Type,
+  FileExt,
+  Endian,
+  Size
 };
 
-struct Token {
-  constexpr explicit Token(TokenType tType) : type{tType}, value{std::nullopt} {}
-  constexpr Token(TokenType tType, TokenValue const& tValue) : type{tType}, value{tValue} {}
+class Token {
+public:
+  constexpr explicit Token(TokenType tType) : type{tType}, _data{std::nullopt} {}
+  constexpr Token(TokenType tType, TokenValue const& tValue) : type{tType}, _data{tValue} {}
 
   auto operator<=>(Token const& other) const = default;
 
+  auto data() const {
+    return _data.value();
+  }
+
   TokenType type;
-  std::optional<TokenValue> value;
+
+private:
+  std::optional<TokenValue> _data;
 };
 } // namespace kaitai::detail
 
@@ -92,7 +102,7 @@ template <> struct std::formatter<kaitai::detail::Token> {
     auto toString = [](Token const& t) -> std::string {
       switch (t.type) {
         using enum TokenType;
-        case Identifier: { return std::format("identifier['{}']", std::get<std::string>(t.value.value())); }
+        case Identifier: { return std::format("identifier['{}']", std::get<std::string>(t.data())); }
         case Blank:
         case Tab:
         case NewLine:

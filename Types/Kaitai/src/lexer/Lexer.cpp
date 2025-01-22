@@ -58,6 +58,15 @@ auto Lexer::handleAlphaNum(std::string_view input) -> std::tuple<std::string_vie
     if (val == "type") {
       return {result, Token{Type}};
     }
+    if (val == "file-extension") {
+      return {result, Token{FileExt}};
+    }
+    if (val == "endian") {
+      return {result, Token{Endian}};
+    }
+    if (val == "size") {
+      return {result, Token{Size}};
+    }
     return {result, Token{Identifier, std::string{val}}};
   }
   return {result, std::nullopt};
@@ -99,7 +108,7 @@ auto Lexer::input(std::string&& string) -> void {
 
 
 auto Lexer::isAlpha(char chr) -> bool {
-  return chr >= 'a' && chr <= 'z' || chr >= 'A' && chr <= 'Z' || chr == '_';
+  return chr >= 'a' && chr <= 'z' || chr >= 'A' && chr <= 'Z' || chr == '_' || chr == '-';
 }
 
 auto Lexer::isDigit(char chr) -> bool {

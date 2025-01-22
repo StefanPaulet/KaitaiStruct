@@ -8,8 +8,14 @@
 
 namespace kaitai::detail {
 
+enum class Endian {
+  LITTLE, BIG
+};
+
 struct Meta {
   std::string id;
+  std::string fileExtension;
+  Endian endian;
 };
 
 } // namespace kaitai::detail
