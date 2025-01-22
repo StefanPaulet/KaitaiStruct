@@ -36,7 +36,23 @@ auto Parser::parseMeta() -> Meta {
   auto updateField = [&result](Token const& token) {
     switch (token.type) {
       case Id: {
-        result.id = std::get<1>(token.value.value());
+        result.id = std::get<1>(token.data());
+        break;
+      }
+      case FileExt: {
+        result.fileExtension = std::get<1>(token.data());
+        break;
+      }
+      case Endian: {
+        if (auto tokenData = std::get<1>(token.data()); tokenData == "le") {
+          result.endian = Endian::LITTLE;
+        } else {
+          if (tokenData == "be") {
+            result.endian = Endian::BIG;
+          } else {
+            throw exceptions::UnknownEndianException(tokenData);
+          }
+        }
         break;
       }
       default: {
@@ -81,7 +97,7 @@ auto Parser::consumeEntry() noexcept(false) -> Token {
   _peek = getToken(_lexer, _istream);
   consumeToken(TokenType::Colon);
   consumeToken(TokenType::Blank);
-  auto entryValue = consumeToken(TokenType::Identifier).value.value();
+  auto entryValue = consumeToken(TokenType::Identifier).data();
   consumeToken(TokenType::NewLine);
   return Token{entryType, entryValue};
 }
