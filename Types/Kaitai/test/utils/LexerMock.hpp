@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <kaitai/Lexer>
 #include <span>
 #include <vector>
