@@ -13,6 +13,8 @@ enum class Endian {
 };
 
 struct Meta {
+  auto operator<=>(Meta const& other) const = default;
+
   std::string id;
   std::string fileExtension;
   Endian endian;

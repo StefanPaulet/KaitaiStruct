@@ -14,6 +14,8 @@ namespace kaitai::detail {
 class Parser {
 private:
   using InputStream = std::basic_istream<char>;
+  using MainSequence = KaitaiStruct::MainSequence;
+  using UserDefinedType = KaitaiStruct::NamedType;
 
 public:
   explicit Parser(InputStream& istream);
@@ -23,14 +25,14 @@ private:
   [[nodiscard]] static auto getToken(Lexer& lexer, InputStream& istream) noexcept(false) -> std::optional<Token>;
 
   auto parseMeta() noexcept(false) -> Meta;
-  auto parseSequence() noexcept(false) -> KaitaiStruct::TopLevelSequence;
+  auto parseSequence() noexcept(false) -> MainSequence;
   auto parseTypes(KaitaiStruct::Types& types) noexcept(false) -> void;
 
   auto consumeToken(TokenType expected) noexcept(false) -> Token;
   auto consumeValueToken() noexcept(false) -> Token;
   auto consumeHeader(TokenType expected) noexcept(false) -> void;
   auto consumeEntry() noexcept(false) -> std::tuple<TokenType, TokenValue>;
-  auto consumeSeqItem(unsigned int indent) noexcept(false) -> std::variant<Chunk, CompoundType>;
+  auto consumeSeqItem(unsigned int indent) noexcept(false) -> std::variant<Chunk, UserDefinedType>;
   auto consumeIndent() noexcept(false) -> unsigned int;
   auto consumeUserDefinedTypeEntry() noexcept(false) -> Sequence;
 

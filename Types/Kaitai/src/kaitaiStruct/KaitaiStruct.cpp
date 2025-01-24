@@ -12,9 +12,9 @@ auto KaitaiStruct::setMeta(Meta const& other) -> void {
   _meta = other;
 }
 
-auto KaitaiStruct::getSequence() const -> TopLevelSequence const& { return _sequence; }
+auto KaitaiStruct::getSequence() const -> MainSequence const& { return _sequence; }
 
-auto KaitaiStruct::setSequence(TopLevelSequence const& other) -> void {
+auto KaitaiStruct::setSequence(MainSequence const& other) -> void {
   _sequence = other;
 }
 
