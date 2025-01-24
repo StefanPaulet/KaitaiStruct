@@ -15,6 +15,7 @@ public:
   explicit Lexer(std::string&& string);
   auto operator()() -> std::optional<Token>;
   auto input(std::string&& newString) -> void;
+  auto leftoverString() const -> std::string_view;
 
 private:
   static auto isAlpha(char chr) -> bool;
@@ -41,6 +42,7 @@ private:
 
   static auto handleAlphaNum(std::string_view input) -> std::tuple<std::string_view, std::optional<Token>>;
   static auto handleWhitespace(std::string_view input) -> std::tuple<std::string_view, std::optional<Token>>;
+  static auto handleStringLiteral(std::string_view input) -> std::tuple<std::string_view, std::optional<std::string_view>>;
 
   std::string _str;
   std::string_view _input;

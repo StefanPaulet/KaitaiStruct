@@ -17,9 +17,11 @@ using TokenValue = std::variant<unsigned int, std::string>;
 
 enum class TokenType {
   Identifier,
+
   Blank,
   Tab,
   NewLine,
+
   Dash,
   Colon,
   Meta,
@@ -28,7 +30,12 @@ enum class TokenType {
   Type,
   FileExt,
   Endian,
-  Size
+  Size,
+  Types,
+  Contents,
+
+  IntLiteral,
+  StringLiteral
 };
 
 class Token {
@@ -38,9 +45,9 @@ public:
 
   auto operator<=>(Token const& other) const = default;
 
-  auto data() const {
-    return _data.value();
-  }
+  auto data() const { return _data.value(); }
+  auto stringData() const { return std::get<std::string>(_data.value()); }
+  auto intData() const { return std::get<unsigned int>(_data.value()); }
 
   TokenType type;
 
@@ -77,6 +84,13 @@ template <> struct std::formatter<kaitai::detail::TokenType> {
         case Id: { return "'id'"; }
         case Seq: { return "'seq'"; }
         case Type: { return "'type'"; }
+        case FileExt: { return "'file-extension'"; }
+        case Endian: { return "'endian'"; }
+        case Size: { return "'size'"; }
+        case Types: { return "'types'"; }
+        case Contents: { return "'contents'"; }
+        case IntLiteral: { return "<int_literal>"; }
+        case StringLiteral: { return "<string_literal>"; }
         default: { assert(false && "Unknown token type"); }
       }
     };
@@ -102,7 +116,7 @@ template <> struct std::formatter<kaitai::detail::Token> {
     auto toString = [](Token const& t) -> std::string {
       switch (t.type) {
         using enum TokenType;
-        case Identifier: { return std::format("identifier['{}']", std::get<std::string>(t.data())); }
+        case Identifier: { return std::format("identifier['{}']", t.stringData()); }
         case Blank:
         case Tab:
         case NewLine:
@@ -111,7 +125,14 @@ template <> struct std::formatter<kaitai::detail::Token> {
         case Meta:
         case Id:
         case Seq:
-        case Type: { return std::format("{}", t.type);  }
+        case Type:
+        case Types:
+        case Contents:
+        case FileExt:
+        case Endian:
+        case Size: { return std::format("{}", t.type);  }
+        case IntLiteral: { return std::format("{}[{}]", t.type, t.intData()); }
+        case StringLiteral: { return std::format("{}[{}]", t.type, t.stringData()); }
         default: { assert(false && "Unknown token type"); }
       }
     };

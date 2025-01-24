@@ -14,6 +14,37 @@ auto Lexer::operator()() -> std::optional<Token> {
     return std::nullopt;
   }
 
+  switch (_input.front()) {
+    using enum TokenType;
+    case ':': {
+      _input.remove_prefix(1);
+      return Token{Colon};
+    }
+    case '-': {
+      _input.remove_prefix(1);
+      return Token{Dash};
+    }
+    case '\'': {
+      _input.remove_prefix(1);
+      auto [newInput, result] = handleStringLiteral(_input);
+      if (!result.has_value()) {
+        return std::nullopt;
+      }
+      _input = newInput;
+      if (_input.empty()) {
+        return std::nullopt;
+      }
+      if (_input.front() != '\'') {
+        throw exceptions::UnmatchedSingleQuoteException{};
+      }
+      _input.remove_prefix(1);
+      return Token{StringLiteral, std::string{result.value()}};
+    }
+    default: {
+      break;
+    }
+  }
+
   if (isAlphaNum(_input.front())) {
     std::optional<Token> token;
     std::tie(_input, token) = handleAlphaNum(_input);
@@ -25,26 +56,19 @@ auto Lexer::operator()() -> std::optional<Token> {
     return token;
   }
 
-  switch (_input.front()) {
-    using enum TokenType;
-    case ':': {
-    _input.remove_prefix(1);
-      return Token{Colon};
-    }
-    case '-': {
-    _input.remove_prefix(1);
-      return Token{Dash};
-    }
-    default: {
-      throw exceptions::UnknownSymbolException{_input.front()};
-    }
-  }
+  throw exceptions::UnknownSymbolException{_input.front()};
 }
 
 auto Lexer::handleAlphaNum(std::string_view input) -> std::tuple<std::string_view, std::optional<Token>> {
+    using enum TokenType;
+
+  if (isDigit(input.front())) {
+    auto [result, tokenStr] = consumeWhile(input, isDigit);
+    return {result, Token{IntLiteral, static_cast<unsigned int>(strtol(tokenStr.value().data(), nullptr, 10))}};
+  }
+
   auto [result, tokenStr] = consumeWhile(input, isAlphaNum);
   if (tokenStr.has_value()) {
-    using enum TokenType;
     auto val = tokenStr.value();
     if (val == "meta") {
       return {result, Token{Meta}};
@@ -66,6 +90,12 @@ auto Lexer::handleAlphaNum(std::string_view input) -> std::tuple<std::string_vie
     }
     if (val == "size") {
       return {result, Token{Size}};
+    }
+    if (val == "types") {
+      return {result, Token{Types}};
+    }
+    if (val == "contents") {
+      return {result, Token{Contents}};
     }
     return {result, Token{Identifier, std::string{val}}};
   }
@@ -101,11 +131,25 @@ auto Lexer::handleWhitespace(std::string_view input) -> std::tuple<std::string_v
   }
 }
 
+auto Lexer::handleStringLiteral(std::string_view input) -> std::tuple<std::string_view, std::optional<std::string_view>> {
+  unsigned int idx = 0;
+  while (idx != input.size() && input[idx] != '\'') {
+    ++idx;
+  }
+  if (input[idx] != '\'') {
+    return {input, std::nullopt};
+  }
+  auto result = input.substr(0, idx);
+  input.remove_prefix(idx);
+  return {input, result};
+}
+
 auto Lexer::input(std::string&& string) -> void {
   _str = std::string(_input) + std::move(string);
   _input = _str;
 }
 
+auto Lexer::leftoverString() const -> std::string_view { return _input; }
 
 auto Lexer::isAlpha(char chr) -> bool {
   return chr >= 'a' && chr <= 'z' || chr >= 'A' && chr <= 'Z' || chr == '_' || chr == '-';

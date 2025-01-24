@@ -8,7 +8,9 @@ add_library(KaitaiStruct
     STATIC
     src/lexer/Lexer.cpp
     src/parser/Parser.cpp
-    src/kaitaiStruct/KaitaiStruct.cpp)
+    src/kaitaiStruct/KaitaiStruct.cpp
+    src/kaitaiStruct/sequence/Sequence.cpp
+    src/kaitaiStruct/type/CompoundType.cpp)
 
 add_executable(main src/main.cpp)
 

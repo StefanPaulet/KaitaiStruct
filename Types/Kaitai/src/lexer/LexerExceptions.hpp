@@ -9,6 +9,10 @@
 namespace kaitai::exceptions {
 class UnknownSymbolException : public detail::Exception {
 public:
-  UnknownSymbolException(char c) : Exception(std::format("Unknown symbol '{}'", c)) {}
+  explicit UnknownSymbolException(char c) : Exception(std::format("Unknown symbol '{}'", c)) {}
+};
+class UnmatchedSingleQuoteException : public detail::Exception {
+public:
+  UnmatchedSingleQuoteException() : Exception("Unmatched \"'\" symbol") {}
 };
 } // kaitai::exceptions
