@@ -86,9 +86,9 @@ auto Parser::parseSequence() noexcept(false) -> KaitaiStruct::TopLevelSequence {
   consumeHeader(Seq);
 
   while (consumeIndent() != 0) {
-    auto newChunk = consumeSeqItem(1);
+    auto newChunk = consumeSeqItem(2);
     if (!std::holds_alternative<CompoundType>(newChunk)) {
-      throw exceptions::TopLevelSeqTypeException{};
+      throw exceptions::MainSeqTypeException{};
     }
     result.push_back(std::move(std::get<CompoundType>(newChunk)));
   }
@@ -108,10 +108,9 @@ auto Parser::parseTypes(KaitaiStruct::Types& types) noexcept(false) -> void {
     if (!types.contains(currentType)) {
       throw exceptions::UnusedTypeException{currentType};
     }
-    types[currentType].seq = consumeTypeEntry();
+    types[currentType].seq = consumeUserDefinedTypeEntry();
   }
 }
-
 
 auto Parser::consumeToken(TokenType expected) noexcept(false) -> Token {
   if (!_peek) {
@@ -133,16 +132,14 @@ auto Parser::consumeValueToken() noexcept(false) -> Token {
   auto peekValue = _peek.value();
   if (peekValue.type != IntLiteral && peekValue.type != StringLiteral
     && peekValue.type != Identifier) {
-    //todo: other exception
-    throw exceptions::UnexpectedTokenException(Identifier, peekValue);
-    }
+    throw exceptions::NonValueTokenException(peekValue.type);
+  }
   _peek = getToken(_lexer, _istream);
   return peekValue;
 }
 
 auto Parser::consumeHeader(TokenType expected) noexcept(false) -> void {
   using enum TokenType;
-
   consumeToken(expected);
   consumeToken(Colon);
   consumeToken(NewLine);
@@ -174,8 +171,8 @@ auto Parser::consumeSeqItem(unsigned int indent) noexcept(false) -> std::variant
   auto typeName = consumeToken(Identifier).stringData();
   consumeToken(NewLine);
 
-  if (consumeIndent() != indent + 1) {
-    throw exceptions::UnalignedEntryException{_peek.value().type};
+  if (indent != consumeIndent()) {
+    throw exceptions::MisalignedEntryException{_peek.value().type, indent, _lastIndent};
   }
 
   auto [entryType, data] = consumeEntry();
@@ -205,27 +202,28 @@ auto Parser::consumeIndent() noexcept(false) -> unsigned int {
     ++indent;
     _peek = getToken(_lexer, _istream);
   }
+  _lastIndent = indent;
   return indent;
 }
 
-auto Parser::consumeTypeEntry() noexcept(false) -> Sequence {
+auto Parser::consumeUserDefinedTypeEntry() noexcept(false) -> Sequence {
   using enum TokenType;
 
   Sequence result{};
 
   if (consumeIndent() != 2) {
-    throw exceptions::UnalignedEntryException{_peek.value().type};
+    throw exceptions::MisalignedEntryException{_peek.value().type, 2, _lastIndent};
   }
 
   consumeHeader(Seq);
-  _lastIndent = consumeIndent();
+  consumeIndent();
   while (_lastIndent == 3) {
-    auto item = consumeSeqItem(3);
+    auto item = consumeSeqItem(4);
     if (std::holds_alternative<CompoundType>(item)) {
       throw exceptions::ErroneousTypeDefinitionException{std::get<CompoundType>(item).name};
     }
     result.addChunk(std::move(std::get<Chunk>(item)));
-    _lastIndent = consumeIndent();
+    consumeIndent();
   }
 
   return result;

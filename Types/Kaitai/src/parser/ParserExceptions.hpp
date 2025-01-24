@@ -14,7 +14,7 @@ using kaitai::detail::Token;
 class UnexpectedTokenException : public detail::Exception {
 public:
   UnexpectedTokenException(TokenType expected, Token const& actual) :
-    Exception(std::format("Expecting token of type {} but found {}", expected, actual)) {}
+    Exception(std::format("Expecting token {} but found {}", expected, actual)) {}
 };
 
 class EndOfStreamException : public detail::Exception {
@@ -28,34 +28,40 @@ public:
     Exception(std::format("Unknown endianness {}", endianess)) {}
 };
 
-class TopLevelSeqTypeException : public detail::Exception {
+class MainSeqTypeException : public detail::Exception {
 public:
-  explicit TopLevelSeqTypeException() : Exception("Main seq items must have type 'type'") {}
+  explicit MainSeqTypeException() : Exception("Main 'seq' items must have type 'type'") {}
 };
 
 class UnexpectedSeqItemType : public detail::Exception {
 public:
   explicit UnexpectedSeqItemType(TokenType type) :
-  Exception(std::format("Unknown type {} in seq specification", type)) {}
+  Exception(std::format("Unknown type {} in 'seq' specification", type)) {}
 };
 
 class UnusedTypeException : public detail::Exception {
 public:
   explicit UnusedTypeException(std::string_view id) :
-    Exception(std::format("Type {} defined but not used in top-level seq specification", id)) {}
+    Exception(std::format("Type {} defined but not used in top-level 'seq' specification", id)) {}
 };
 
 class ErroneousTypeDefinitionException : public detail::Exception {
 public:
   explicit ErroneousTypeDefinitionException(std::string_view id) :
-    Exception(std::format("Cannot define types using user-defined types (field={})", id)) {}
+    Exception(std::format("User-defined types may not appear in anot types definition (field={})", id)) {}
 };
 
-class UnalignedEntryException : public detail::Exception {
+class MisalignedEntryException : public detail::Exception {
 public:
-  explicit UnalignedEntryException(TokenType type) :
-    Exception(std::format("Missing indentation on token {}", type)) {}
+  explicit MisalignedEntryException(TokenType type, unsigned int expected, unsigned int actual) :
+    Exception(std::format("Bad indentation on token {}: expected indentation {} but has {}", type, expected, actual)) {}
 
+};
+
+class NonValueTokenException : public detail::Exception {
+public:
+  explicit NonValueTokenException(TokenType type) :
+    Exception(std::format("Entry items must be an 'identifier', <string_literal> or <int_literal>, not {}", type)) {}
 };
 
 class PositionalException : public detail::Exception {

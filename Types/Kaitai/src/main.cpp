@@ -3,7 +3,8 @@
 //
 
 #include <kaitai/Parser>
-#include <sstream>;
+#include <sstream>
+
 using namespace kaitai::detail;
 
 int main() {
