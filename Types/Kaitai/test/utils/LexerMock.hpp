@@ -25,6 +25,13 @@ constexpr auto meta = Token{Meta};
 constexpr auto id = Token{Id};
 constexpr auto seq = Token{Seq};
 constexpr auto type = Token{Type};
+constexpr auto fileExt = Token{FileExt};
+constexpr auto endian = Token{Endian};
+constexpr auto size = Token{Size};
+constexpr auto types = Token{Types};
+constexpr auto contents = Token{Contents};
+constexpr auto intLit = [](unsigned int val) { return Token{IntLiteral, val}; };
+constexpr auto strLit = [](std::string const& val) { return Token{StringLiteral, val}; };
 constexpr auto identifier = [](TokenValue const& value) { return Token{Identifier, value}; };
 
 using TokenStream = std::vector<Token>;

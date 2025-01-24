@@ -55,6 +55,41 @@ TEST(LexerTest, Type) {
   ASSERT_TRUE(compareTokens(lexer, TokenStream{type, newline}));
 }
 
+TEST(LexerTest, FileExt) {
+  Lexer lexer{"file-extension\n"};
+  ASSERT_TRUE(compareTokens(lexer, TokenStream{fileExt, newline}));
+}
+
+TEST(LexerTest, Endian) {
+  Lexer lexer{"endian\n"};
+  ASSERT_TRUE(compareTokens(lexer, TokenStream{endian, newline}));
+}
+
+TEST(LexerTest, Size) {
+  Lexer lexer{"size\n"};
+  ASSERT_TRUE(compareTokens(lexer, TokenStream{size, newline}));
+}
+
+TEST(LexerTest, Types) {
+  Lexer lexer{"types\n"};
+  ASSERT_TRUE(compareTokens(lexer, TokenStream{types, newline}));
+}
+
+TEST(LexerTest, Contents) {
+  Lexer lexer{"contents\n"};
+  ASSERT_TRUE(compareTokens(lexer, TokenStream{contents, newline}));
+}
+
+TEST(LexerTest, IntLiteral) {
+  Lexer lexer{"123\n"};
+  ASSERT_TRUE(compareTokens(lexer, TokenStream{intLit(123), newline}));
+}
+
+TEST(LexerTest, StringLiteral) {
+  Lexer lexer{"'abcde'\n"};
+  ASSERT_TRUE(compareTokens(lexer, TokenStream{strLit("abcde"), newline}));
+}
+
 TEST(LexerTest, TabOfSpaces) {
   Lexer lexer{"  "};
   ASSERT_TRUE(compareTokens(lexer, TokenStream{tab}));
