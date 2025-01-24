@@ -33,5 +33,10 @@ public:
 private:
   std::vector<Chunk> _chunks{};
 };
+
+struct CompoundType {
+  std::string name;
+  Sequence seq;
+};
 } // namespace kaitai::detail
 

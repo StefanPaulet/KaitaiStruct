@@ -43,7 +43,7 @@ inline auto compareSequences(KaitaiStruct::MainSequence const& actual, std::dequ
   return true;
 }
 
-inline auto compareTypes(KaitaiStruct::Types const& actual, std::vector<std::tuple<std::string, std::deque<Chunk>>>&& expected) -> bool {
+inline auto compareTypes(KaitaiStruct::TypesMap const& actual, std::vector<std::tuple<std::string, std::deque<Chunk>>>&& expected) -> bool {
   for (auto&& [name, seq] : std::move(expected)) {
     if (auto it = actual.find(name); it != actual.end()) {
       auto const& actualSeq = it->second;

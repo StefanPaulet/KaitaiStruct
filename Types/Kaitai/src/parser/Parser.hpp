@@ -16,6 +16,7 @@ private:
   using InputStream = std::basic_istream<char>;
   using MainSequence = KaitaiStruct::MainSequence;
   using UserDefinedType = KaitaiStruct::NamedType;
+  using TypesMap = KaitaiStruct::TypesMap;
 
 public:
   explicit Parser(InputStream& istream);
@@ -26,7 +27,7 @@ private:
 
   auto parseMeta() noexcept(false) -> Meta;
   auto parseSequence() noexcept(false) -> MainSequence;
-  auto parseTypes(KaitaiStruct::Types& types) noexcept(false) -> void;
+  auto parseTypes(TypesMap& types) noexcept(false) -> void;
 
   auto consumeToken(TokenType expected) noexcept(false) -> Token;
   auto consumeValueToken() noexcept(false) -> Token;
