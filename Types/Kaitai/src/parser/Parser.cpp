@@ -16,7 +16,7 @@ auto Parser::operator()() -> KaitaiStruct {
     auto sequence = parseSequence();
     KaitaiStruct::Types compoundTypes {};
     for (auto const& chunk : sequence) {
-      compoundTypes.emplace(chunk.name, CompoundType{});
+      compoundTypes.emplace(std::get<1>(chunk).name, CompoundType{});
     }
     kaitaiStruct.setSequence(sequence);
 
@@ -80,17 +80,17 @@ auto Parser::parseMeta() -> Meta {
   return result;
 }
 
-auto Parser::parseSequence() noexcept(false) -> KaitaiStruct::TopLevelSequence {
-  KaitaiStruct::TopLevelSequence result{};
+auto Parser::parseSequence() noexcept(false) -> KaitaiStruct::MainSequence {
+  KaitaiStruct::MainSequence result{};
   using enum TokenType;
   consumeHeader(Seq);
 
   while (consumeIndent() != 0) {
     auto newChunk = consumeSeqItem(2);
-    if (!std::holds_alternative<CompoundType>(newChunk)) {
+    if (!std::holds_alternative<UserDefinedType>(newChunk)) {
       throw exceptions::MainSeqTypeException{};
     }
-    result.push_back(std::move(std::get<CompoundType>(newChunk)));
+    result.push_back(std::move(std::get<UserDefinedType>(newChunk)));
   }
 
   return result;
@@ -160,7 +160,7 @@ auto Parser::consumeEntry() noexcept(false) -> std::tuple<TokenType, TokenValue>
   return {entryType, entryValue.data()};
 }
 
-auto Parser::consumeSeqItem(unsigned int indent) noexcept(false) -> std::variant<Chunk, CompoundType> {
+auto Parser::consumeSeqItem(unsigned int indent) noexcept(false) -> std::variant<Chunk, UserDefinedType> {
   using enum TokenType;
 
   consumeToken(Dash);
@@ -182,7 +182,7 @@ auto Parser::consumeSeqItem(unsigned int indent) noexcept(false) -> std::variant
         it != _rawTypes.end()) {
         return Chunk{typeName, it->second};
       }
-      return CompoundType{typeName, {}};
+      return KaitaiStruct::NamedType{typeName, CompoundType{std::get<std::string>(data), {}}};
     }
     case Contents: {
       return Chunk{typeName, std::get<std::string>(data)};
@@ -219,8 +219,8 @@ auto Parser::consumeUserDefinedTypeEntry() noexcept(false) -> Sequence {
   consumeIndent();
   while (_lastIndent == 3) {
     auto item = consumeSeqItem(4);
-    if (std::holds_alternative<CompoundType>(item)) {
-      throw exceptions::ErroneousTypeDefinitionException{std::get<CompoundType>(item).name};
+    if (std::holds_alternative<UserDefinedType>(item)) {
+      throw exceptions::ErroneousTypeDefinitionException{std::get<0>(std::get<UserDefinedType>(item))};
     }
     result.addChunk(std::move(std::get<Chunk>(item)));
     consumeIndent();

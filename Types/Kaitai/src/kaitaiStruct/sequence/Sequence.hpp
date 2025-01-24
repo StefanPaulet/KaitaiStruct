@@ -17,6 +17,8 @@ struct Chunk {
     U1, U2
   };
 
+  auto operator<=>(Chunk const& other) const = default;
+
   std::string id;
   std::variant<Size, Constant, RawType> data;
 };
@@ -26,6 +28,7 @@ public:
   auto addChunk(Chunk&& chunk) -> void;
   [[nodiscard]] auto containsChunk(std::string const& chunkId) const -> bool;
   [[nodiscard]] auto chunks() const -> std::vector<Chunk> const&;
+  auto operator<=>(Sequence const& other) const = default;
 
 private:
   std::vector<Chunk> _chunks{};

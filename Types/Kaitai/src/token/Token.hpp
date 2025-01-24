@@ -41,7 +41,10 @@ enum class TokenType {
 class Token {
 public:
   constexpr explicit Token(TokenType tType) : type{tType}, _data{std::nullopt} {}
-  constexpr Token(TokenType tType, TokenValue const& tValue) : type{tType}, _data{tValue} {}
+  constexpr Token(TokenType tType, TokenValue const& tValue) : type{tType}, _data{tValue} {
+    assert((tType == TokenType::Identifier || tType == TokenType::IntLiteral || tType == TokenType::StringLiteral)
+      && "Bad token type for a valued token");
+  }
 
   auto operator<=>(Token const& other) const = default;
 
