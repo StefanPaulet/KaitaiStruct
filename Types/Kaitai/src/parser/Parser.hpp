@@ -32,7 +32,7 @@ private:
   auto consumeEntry() noexcept(false) -> std::tuple<TokenType, TokenValue>;
   auto consumeSeqItem(unsigned int indent) noexcept(false) -> std::variant<Chunk, CompoundType>;
   auto consumeIndent() noexcept(false) -> unsigned int;
-  auto consumeTypeEntry() noexcept(false) -> Sequence;
+  auto consumeUserDefinedTypeEntry() noexcept(false) -> Sequence;
 
   static constexpr auto readChunkSize = 1024;
   InputStream& _istream;
