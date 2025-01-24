@@ -14,7 +14,7 @@ auto Parser::operator()() -> KaitaiStruct {
     kaitaiStruct.setMeta(parseMeta());
 
     auto sequence = parseSequence();
-    KaitaiStruct::Types compoundTypes {};
+    TypesMap compoundTypes {};
     for (auto const& chunk : sequence) {
       compoundTypes.emplace(std::get<1>(chunk).name, CompoundType{});
     }
@@ -96,7 +96,7 @@ auto Parser::parseSequence() noexcept(false) -> KaitaiStruct::MainSequence {
   return result;
 }
 
-auto Parser::parseTypes(KaitaiStruct::Types& types) noexcept(false) -> void {
+auto Parser::parseTypes(TypesMap& types) noexcept(false) -> void {
   using enum TokenType;
   consumeHeader(Types);
 

@@ -18,9 +18,9 @@ auto KaitaiStruct::setSequence(MainSequence const& other) -> void {
   _sequence = other;
 }
 
-auto KaitaiStruct::getTypes() const -> Types const& { return _compoundTypes; }
+auto KaitaiStruct::getTypes() const -> TypesMap const& { return _compoundTypes; }
 
-auto KaitaiStruct::setTypes(Types const& other) -> void {
+auto KaitaiStruct::setTypes(TypesMap const& other) -> void {
   _compoundTypes = other;
 }
 
