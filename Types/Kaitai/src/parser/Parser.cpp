@@ -9,7 +9,23 @@ Parser::Parser(InputStream& istream) : _istream(istream) {}
 
 auto Parser::operator()() -> KaitaiStruct {
   KaitaiStruct kaitaiStruct{};
-  kaitaiStruct.setMeta(parseMeta());
+
+  try {
+    kaitaiStruct.setMeta(parseMeta());
+
+    auto sequence = parseSequence();
+    KaitaiStruct::Types compoundTypes {};
+    for (auto const& chunk : sequence) {
+      compoundTypes.emplace(chunk.name, CompoundType{});
+    }
+    kaitaiStruct.setSequence(sequence);
+
+    parseTypes(compoundTypes);
+    kaitaiStruct.setTypes(compoundTypes);
+  } catch (exceptions::detail::Exception const& e) {
+    throw exceptions::PositionalException{e, _lexer.leftoverString()};
+  }
+
   return kaitaiStruct;
 }
 
@@ -33,18 +49,19 @@ auto Parser::parseMeta() -> Meta {
   _peek = getToken(_lexer, _istream).value();
   consumeHeader(Meta);
 
-  auto updateField = [&result](Token const& token) {
-    switch (token.type) {
+  while (consumeIndent() != 0) {
+    auto [entryType, data] = consumeEntry();
+    switch (entryType) {
       case Id: {
-        result.id = std::get<1>(token.data());
+        result.id = std::get<std::string>(data);
         break;
       }
       case FileExt: {
-        result.fileExtension = std::get<1>(token.data());
+        result.fileExtension = std::get<std::string>(data);
         break;
       }
       case Endian: {
-        if (auto tokenData = std::get<1>(token.data()); tokenData == "le") {
+        if (auto tokenData = std::get<std::string>(data); tokenData == "le") {
           result.endian = Endian::LITTLE;
         } else {
           if (tokenData == "be") {
@@ -59,17 +76,42 @@ auto Parser::parseMeta() -> Meta {
         assert(false && "Unhandled entry for meta field");
       }
     }
-  };
-
-  while (true) {
-    if (!_peek || _peek.value().type != Tab) {
-      break;
-    }
-    _peek = getToken(_lexer, _istream).value();
-    updateField(consumeEntry());
   }
   return result;
 }
+
+auto Parser::parseSequence() noexcept(false) -> KaitaiStruct::TopLevelSequence {
+  KaitaiStruct::TopLevelSequence result{};
+  using enum TokenType;
+  consumeHeader(Seq);
+
+  while (consumeIndent() != 0) {
+    auto newChunk = consumeSeqItem(1);
+    if (!std::holds_alternative<CompoundType>(newChunk)) {
+      throw exceptions::TopLevelSeqTypeException{};
+    }
+    result.push_back(std::move(std::get<CompoundType>(newChunk)));
+  }
+
+  return result;
+}
+
+auto Parser::parseTypes(KaitaiStruct::Types& types) noexcept(false) -> void {
+  using enum TokenType;
+  consumeHeader(Types);
+
+  _lastIndent = consumeIndent();
+  while (_lastIndent != 0) {
+    auto currentType = consumeToken(Identifier).stringData();
+    consumeToken(Colon);
+    consumeToken(NewLine);
+    if (!types.contains(currentType)) {
+      throw exceptions::UnusedTypeException{currentType};
+    }
+    types[currentType].seq = consumeTypeEntry();
+  }
+}
+
 
 auto Parser::consumeToken(TokenType expected) noexcept(false) -> Token {
   if (!_peek) {
@@ -83,23 +125,110 @@ auto Parser::consumeToken(TokenType expected) noexcept(false) -> Token {
   return peekValue;
 }
 
-auto Parser::consumeHeader(TokenType expected) noexcept(false) -> void {
-  consumeToken(expected);
-  consumeToken(TokenType::Colon);
-  consumeToken(TokenType::NewLine);
+auto Parser::consumeValueToken() noexcept(false) -> Token {
+  using enum TokenType;
+  if (!_peek) {
+    throw exceptions::EndOfStreamException{};
+  }
+  auto peekValue = _peek.value();
+  if (peekValue.type != IntLiteral && peekValue.type != StringLiteral
+    && peekValue.type != Identifier) {
+    //todo: other exception
+    throw exceptions::UnexpectedTokenException(Identifier, peekValue);
+    }
+  _peek = getToken(_lexer, _istream);
+  return peekValue;
 }
 
-auto Parser::consumeEntry() noexcept(false) -> Token {
+auto Parser::consumeHeader(TokenType expected) noexcept(false) -> void {
+  using enum TokenType;
+
+  consumeToken(expected);
+  consumeToken(Colon);
+  consumeToken(NewLine);
+}
+
+auto Parser::consumeEntry() noexcept(false) -> std::tuple<TokenType, TokenValue> {
+  using enum TokenType;
+
   if (!_peek) {
     throw exceptions::EndOfStreamException{};
   }
   auto entryType = _peek.value().type;
   _peek = getToken(_lexer, _istream);
-  consumeToken(TokenType::Colon);
-  consumeToken(TokenType::Blank);
-  auto entryValue = consumeToken(TokenType::Identifier).data();
-  consumeToken(TokenType::NewLine);
-  return Token{entryType, entryValue};
+  consumeToken(Colon);
+  consumeToken(Blank);
+  auto entryValue = consumeValueToken();
+  consumeToken(NewLine);
+  return {entryType, entryValue.data()};
+}
+
+auto Parser::consumeSeqItem(unsigned int indent) noexcept(false) -> std::variant<Chunk, CompoundType> {
+  using enum TokenType;
+
+  consumeToken(Dash);
+  consumeToken(Blank);
+  consumeToken(Id);
+  consumeToken(Colon);
+  consumeToken(Blank);
+  auto typeName = consumeToken(Identifier).stringData();
+  consumeToken(NewLine);
+
+  if (consumeIndent() != indent + 1) {
+    throw exceptions::UnalignedEntryException{_peek.value().type};
+  }
+
+  auto [entryType, data] = consumeEntry();
+  switch (entryType) {
+    case Type: {
+      if (auto it = _rawTypes.find(std::get<std::string>(data));
+        it != _rawTypes.end()) {
+        return Chunk{typeName, it->second};
+      }
+      return CompoundType{typeName, {}};
+    }
+    case Contents: {
+      return Chunk{typeName, std::get<std::string>(data)};
+    }
+    case Size: {
+      return Chunk{typeName, std::get<unsigned int>(data)};
+    }
+    default: {
+      throw exceptions::UnexpectedSeqItemType{entryType};
+    }
+  }
+}
+
+auto Parser::consumeIndent() noexcept(false) -> unsigned int {
+  unsigned int indent = 0;
+  while (_peek && _peek.value().type == TokenType::Tab) {
+    ++indent;
+    _peek = getToken(_lexer, _istream);
+  }
+  return indent;
+}
+
+auto Parser::consumeTypeEntry() noexcept(false) -> Sequence {
+  using enum TokenType;
+
+  Sequence result{};
+
+  if (consumeIndent() != 2) {
+    throw exceptions::UnalignedEntryException{_peek.value().type};
+  }
+
+  consumeHeader(Seq);
+  _lastIndent = consumeIndent();
+  while (_lastIndent == 3) {
+    auto item = consumeSeqItem(3);
+    if (std::holds_alternative<CompoundType>(item)) {
+      throw exceptions::ErroneousTypeDefinitionException{std::get<CompoundType>(item).name};
+    }
+    result.addChunk(std::move(std::get<Chunk>(item)));
+    _lastIndent = consumeIndent();
+  }
+
+  return result;
 }
 
 
