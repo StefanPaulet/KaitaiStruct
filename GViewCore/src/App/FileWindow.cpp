@@ -6,6 +6,7 @@
 #include "TextViewer.hpp"
 #include "ContainerViewer.hpp"
 #include "LexicalViewer.hpp"
+#include "KaitaiViewer.hpp"
 
 using namespace GView::App;
 using namespace GView::App::InstanceCommands;
@@ -157,6 +158,10 @@ bool FileWindow::CreateViewer(GView::View::DissasmViewer::Settings& settings)
 bool FileWindow::CreateViewer(GView::View::LexicalViewer::Settings& settings)
 {
     return this->view->CreateChildControl<GView::View::LexicalViewer::Instance>(Reference<GView::Object>(this->obj.get()), &settings).IsValid();
+}
+bool FileWindow::CreateViewer(GView::View::KaitaiViewer::Settings& settings)
+{
+    return this->view->CreateChildControl<GView::View::KaitaiViewer::Instance>(Reference<GView::Object>(this->obj.get()), &settings).IsValid();
 }
 
 Reference<ViewControl> FileWindow::GetCurrentView()

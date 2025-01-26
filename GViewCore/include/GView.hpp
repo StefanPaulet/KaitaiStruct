@@ -1005,6 +1005,17 @@ namespace View
         };
     }; // namespace ImageViewer
 
+    namespace KaitaiViewer
+    {
+        struct SettingsData;
+        struct CORE_EXPORT Settings {
+            SettingsData* _data;
+
+            Settings();
+            void setAnalysisLevel(int level) const;
+        };
+    }; // namespace ImageViewer
+
     namespace ContainerViewer
     {
         struct CORE_EXPORT EnumerateInterface {
@@ -1483,6 +1494,7 @@ namespace View
         virtual bool CreateViewer(TextViewer::Settings& settings)      = 0;
         virtual bool CreateViewer(ContainerViewer::Settings& settings) = 0;
         virtual bool CreateViewer(LexicalViewer::Settings& settings)   = 0;
+        virtual bool CreateViewer(KaitaiViewer::Settings& settings)   = 0;
         virtual Reference<ViewControl> GetCurrentView()                = 0;
         virtual uint32 GetViewsCount()                                 = 0;
         virtual Reference<ViewControl> GetViewByIndex(uint32 index)    = 0;

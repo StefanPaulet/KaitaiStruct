@@ -71,6 +71,10 @@ extern "C"
         CreateImageView(win, ico);
         CreateBufferView(win, ico);
 
+        GView::View::KaitaiViewer::Settings settings;
+        settings.setAnalysisLevel(3);
+        win->CreateViewer(settings);
+
         // add panels
         win->AddPanel(Pointer<TabPage>(new ICO::Panels::Information(ico)), true);
         win->AddPanel(Pointer<TabPage>(new ICO::Panels::Directories(ico, win)), true);

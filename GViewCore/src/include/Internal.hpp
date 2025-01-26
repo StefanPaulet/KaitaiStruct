@@ -16,8 +16,7 @@ namespace Utils
     class Selection
     {
         static constexpr uint32 MAX_SELECTION_ZONES = 4;
-        struct
-        {
+        struct {
             uint64 start, end, originalPoint;
             FixSizeString<32> stringRepresentation;
         } zones[MAX_SELECTION_ZONES];
@@ -94,8 +93,7 @@ namespace Utils
         void CopySetTo(bool ascii[256]);
     };
 
-    struct UnicodeString
-    {
+    struct UnicodeString {
         char16* text;
         uint32 size;
         uint32 allocated;
@@ -126,14 +124,7 @@ namespace Utils
 
     namespace CharacterEncoding
     {
-        enum class Encoding : uint8
-        {
-            Binary      = 0,
-            Ascii       = 1,
-            UTF8        = 2,
-            Unicode16LE = 3,
-            Unicode16BE = 4
-        };
+        enum class Encoding : uint8 { Binary = 0, Ascii = 1, UTF8 = 2, Unicode16LE = 3, Unicode16BE = 4 };
         class ExpandedCharacter
         {
             char16 unicodeValue;
@@ -162,22 +153,19 @@ namespace Utils
             bool FromUTF8Buffer(const uint8* start, const uint8* end);
             inline bool FromEncoding(Encoding e, const uint8* start, const uint8* end)
             {
-                if (start >= end)
-                {
+                if (start >= end) {
                     unicodeValue = 0;
                     length       = 0;
                     return false;
                 }
-                switch (e)
-                {
+                switch (e) {
                 case Encoding::Ascii:
                 case Encoding::Binary:
                     unicodeValue = *start;
                     length       = 1;
                     return true;
                 case Encoding::Unicode16LE:
-                    if (start + 1 < end)
-                    {
+                    if (start + 1 < end) {
                         length       = 2;
                         unicodeValue = *(const char16*) start;
                         return true;
@@ -186,8 +174,7 @@ namespace Utils
                     unicodeValue = 0;
                     return false;
                 case Encoding::Unicode16BE:
-                    if (start + 1 < end)
-                    {
+                    if (start + 1 < end) {
                         length       = 2;
                         unicodeValue = ((uint16) (*start) << 8) | (start[1]);
                         return true;
@@ -196,8 +183,7 @@ namespace Utils
                     unicodeValue = 0;
                     return false;
                 case Encoding::UTF8:
-                    if ((*start) < 0x80)
-                    {
+                    if ((*start) < 0x80) {
                         unicodeValue = *start;
                         length       = 1;
                         return true;
@@ -220,11 +206,9 @@ namespace Utils
           public:
             inline BufferView Encode(char16 ch, Encoding encoding)
             {
-                switch (encoding)
-                {
+                switch (encoding) {
                 case Encoding::UTF8:
-                    if (ch < 256)
-                    {
+                    if (ch < 256) {
                         internalBuffer[0] = static_cast<uint8>(ch);
                         return BufferView(internalBuffer, 1);
                     }
@@ -256,8 +240,7 @@ namespace Generic
     class Plugin
     {
         FixSizeString<29> Name;
-        struct
-        {
+        struct {
             FixSizeString<25> Name;
             Input::Key ShortKey;
         } Commands[MAX_PLUGINS_COMMANDS];
@@ -291,18 +274,15 @@ namespace Type
     {
         class TextParser
         {
-            struct
-            {
+            struct {
                 const char16* text;
                 uint32 size;
             } Raw;
-            struct
-            {
+            struct {
                 const char16* text;
                 uint32 size;
             } Text;
-            struct
-            {
+            struct {
                 uint32 offsets[10];
                 uint32 count;
                 bool computed;
@@ -322,15 +302,13 @@ namespace Type
                 return std::span<uint32>(this->Lines.offsets, static_cast<size_t>(this->Lines.count));
             }
         };
-        struct Interface
-        {
+        struct Interface {
             virtual bool Init(std::string_view text)                            = 0;
             virtual bool Match(AppCUI::Utils::BufferView buf, TextParser& text) = 0;
         };
         class MagicMatcher : public Interface
         {
-            union
-            {
+            union {
                 uint8 u8[16];
                 uint16 u16[8];
                 uint32 u32[4];
@@ -365,8 +343,7 @@ namespace Type
         Interface* CreateFromString(std::string_view stringRepresentation);
     } // namespace Matcher
 
-    struct PluginCommand
-    {
+    struct PluginCommand {
         FixSizeString<25> name;
         Input::Key key;
     };
@@ -455,17 +432,21 @@ namespace App
         constexpr int CMD_COPY_DIALOG           = 30012350;
         constexpr int CMD_SWITCH_TO_VIEW        = 30012351;
 
-        static GView::KeyboardControl FILE_WINDOW_COMMAND_GOTO   = { Input::Key::Ctrl | Input::Key::G, "GoToDialog", "Open the GoTo dialog", CMD_GOTO };
-        static GView::KeyboardControl INSTANCE_COMMAND_GOTO      = { Input::Key::F5, "GoToDialog", "Open the GoTo dialog", CMD_GOTO };
-        static GView::KeyboardControl FILE_WINDOW_COMMAND_FIND   = { Input::Key::Ctrl | Input::Key::F, "FindDialog", "Open the Find dialog", CMD_FIND };
-        static GView::KeyboardControl INSTANCE_COMMAND_FIND      = { Input::Key::Alt | Input::Key::F7, "FindDialog", "Open the Find dialog", CMD_FIND };
-        static GView::KeyboardControl FILE_WINDOW_COMMAND_COPY   = { Input::Key::Ctrl | Input::Key::C, "CopyDialog", "Open the CopyPaste dialog", CMD_COPY_DIALOG };
-        static GView::KeyboardControl FILE_WINDOW_COMMAND_INSERT = { Input::Key::Ctrl | Input::Key::Insert, "CopyDialog", "Open the CopyPaste dialog", CMD_COPY_DIALOG };
-        static GView::KeyboardControl INSTANCE_CHANGE_VIEW      = { Input::Key::F4, "ChangeView", "Change the current viewer", CMD_NEXT_VIEW };
-        static GView::KeyboardControl INSTANCE_SWITCH_TO_VIEW        = { Input::Key::Alt | Input::Key::F, "SwitchToView", "Set focus on viewer", CMD_SWITCH_TO_VIEW };
-        static GView::KeyboardControl INSTANCE_CHOOSE_TYPE         = { Input::Key::Alt | Input::Key::F1, "ChooseType", "Choose a new plugin type", CMD_SWITCH_TO_VIEW };
+        static GView::KeyboardControl FILE_WINDOW_COMMAND_GOTO = { Input::Key::Ctrl | Input::Key::G, "GoToDialog", "Open the GoTo dialog", CMD_GOTO };
+        static GView::KeyboardControl INSTANCE_COMMAND_GOTO    = { Input::Key::F5, "GoToDialog", "Open the GoTo dialog", CMD_GOTO };
+        static GView::KeyboardControl FILE_WINDOW_COMMAND_FIND = { Input::Key::Ctrl | Input::Key::F, "FindDialog", "Open the Find dialog", CMD_FIND };
+        static GView::KeyboardControl INSTANCE_COMMAND_FIND    = { Input::Key::Alt | Input::Key::F7, "FindDialog", "Open the Find dialog", CMD_FIND };
+        static GView::KeyboardControl FILE_WINDOW_COMMAND_COPY = {
+            Input::Key::Ctrl | Input::Key::C, "CopyDialog", "Open the CopyPaste dialog", CMD_COPY_DIALOG
+        };
+        static GView::KeyboardControl FILE_WINDOW_COMMAND_INSERT = {
+            Input::Key::Ctrl | Input::Key::Insert, "CopyDialog", "Open the CopyPaste dialog", CMD_COPY_DIALOG
+        };
+        static GView::KeyboardControl INSTANCE_CHANGE_VIEW    = { Input::Key::F4, "ChangeView", "Change the current viewer", CMD_NEXT_VIEW };
+        static GView::KeyboardControl INSTANCE_SWITCH_TO_VIEW = { Input::Key::Alt | Input::Key::F, "SwitchToView", "Set focus on viewer", CMD_SWITCH_TO_VIEW };
+        static GView::KeyboardControl INSTANCE_CHOOSE_TYPE = { Input::Key::Alt | Input::Key::F1, "ChooseType", "Choose a new plugin type", CMD_SWITCH_TO_VIEW };
         static GView::KeyboardControl INSTANCE_KEY_CONFIGURATOR = { Input::Key::F1, "ShowKeys", "Show available keys", CMD_SHOW_KEY_CONFIGURATOR };
-    }
+    } // namespace InstanceCommands
 
     class Instance : public AppCUI::Utils::PropertiesInterface,
                      public AppCUI::Controls::Handlers::OnEventInterface,
@@ -490,10 +471,7 @@ namespace App
         void ShowAboutWindow();
 
         Reference<Type::Plugin> IdentifyTypePlugin_FirstMatch(
-              const std::string_view& extension,
-              AppCUI::Utils::BufferView buf,
-              GView::Type::Matcher::TextParser& textParser,
-              uint64 extensionHash);
+              const std::string_view& extension, AppCUI::Utils::BufferView buf, GView::Type::Matcher::TextParser& textParser, uint64 extensionHash);
         Reference<Type::Plugin> IdentifyTypePlugin_BestMatch(
               const AppCUI::Utils::ConstString& name,
               const AppCUI::Utils::ConstString& path,
@@ -540,10 +518,13 @@ namespace App
 
       public:
         Instance();
-        virtual ~Instance() {}
+        virtual ~Instance()
+        {
+        }
         bool Init();
         bool AddFileWindow(const std::filesystem::path& path, OpenMethod method, string_view typeName, Reference<Window> parent = nullptr);
-        bool AddBufferWindow(BufferView buf, const ConstString& name, const ConstString& path, OpenMethod method, string_view typeName, Reference<Window> parent);
+        bool AddBufferWindow(
+              BufferView buf, const ConstString& name, const ConstString& path, OpenMethod method, string_view typeName, Reference<Window> parent);
         void UpdateCommandBar(AppCUI::Application::CommandBar& commandBar);
 
         // inline getters
@@ -613,8 +594,7 @@ namespace App
         inline const std::u16string GetFilename()
         {
             std::u16string filename;
-            if (txName.IsValid())
-            {
+            if (txName.IsValid()) {
                 txName->GetText().ToString(filename);
             }
 
@@ -664,6 +644,7 @@ namespace App
         bool CreateViewer(View::TextViewer::Settings& settings) override;
         bool CreateViewer(View::ContainerViewer::Settings& settings) override;
         bool CreateViewer(View::LexicalViewer::Settings& settings) override;
+        bool CreateViewer(View::KaitaiViewer::Settings& settings) override;
 
         Reference<GView::Utils::SelectionZoneInterface> GetSelectionZoneInterfaceFromViewerCreation(View::BufferViewer::Settings& settings) override;
 
@@ -684,15 +665,16 @@ namespace App
         bool OnEvent(Reference<Control> control, Event eventType, int ID) override;
     };
 
-    struct KeyboardControlsImplementation : public KeyboardControlsInterface
-    {
+    struct KeyboardControlsImplementation : public KeyboardControlsInterface {
         struct OwnedKeyboardControl {
             Input::Key Key;
             std::string Caption;
             std::string Explanation;
             uint32 CommandId;
 
-            OwnedKeyboardControl(KeyboardControl* key) : Key(key->Key), Caption(key->Caption), Explanation(key->Explanation), CommandId(key->CommandId){}
+            OwnedKeyboardControl(KeyboardControl* key) : Key(key->Key), Caption(key->Caption), Explanation(key->Explanation), CommandId(key->CommandId)
+            {
+            }
         };
 
         std::vector<OwnedKeyboardControl> keys;
