@@ -10,6 +10,7 @@ add_library(KaitaiStruct
     src/parser/Parser.cpp
     src/kaitaiStruct/KaitaiStruct.cpp
     src/kaitaiStruct/sequence/Sequence.cpp
+    src/binaryParser/BinaryParser.cpp
 )
 
 add_executable(main src/main.cpp)

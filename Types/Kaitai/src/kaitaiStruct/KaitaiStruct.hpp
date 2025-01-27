@@ -13,7 +13,7 @@ namespace kaitai::detail {
 
 class KaitaiStruct {
 public:
-  using NamedType = std::tuple<std::string, CompoundType>;
+  using NamedType = std::tuple<std::string, std::string>;
   using MainSequence = std::vector<NamedType>;
   using TypesMap = std::unordered_map<std::string, CompoundType>;
 

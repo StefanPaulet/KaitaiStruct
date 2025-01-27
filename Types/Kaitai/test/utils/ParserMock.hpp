@@ -27,8 +27,7 @@ inline auto type(std::string name, Chunk::RawType type) -> Chunk {
 }
 
 inline auto compareSequences(KaitaiStruct::MainSequence const& actual, std::deque<std::tuple<std::string, std::string>>&& expected) {
-  for (auto const& [name, type] : actual) {
-    auto typeName = type.name;
+  for (auto const& [name, typeName] : actual) {
     auto [expName, expTypeName] = expected.front();
     if (name != expName) {
       std::cout << std::format("Item name {} does not match expected {}\n", name, expName);

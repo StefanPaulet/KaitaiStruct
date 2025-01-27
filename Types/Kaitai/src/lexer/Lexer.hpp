@@ -6,6 +6,7 @@
 
 #include "../token/Token.hpp"
 #include "LexerExceptions.hpp"
+#include <functional>
 
 namespace kaitai::detail {
 
