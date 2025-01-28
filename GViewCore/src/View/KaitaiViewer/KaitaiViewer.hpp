@@ -3,14 +3,31 @@
 #include "Internal.hpp"
 #include "AppCUI/include/AppCUI.hpp"
 
+#include <kaitai/Parser>
+#include <kaitai/BinaryParser>
+
 namespace GView::View::KaitaiViewer
 {
 using namespace AppCUI;
 using namespace GView::Utils;
 
+using kaitai::detail::BinaryParser;
+using kaitai::detail::Chunk;
+using kaitai::detail::KaitaiStruct;
+using kaitai::detail::ParsedBinary;
+using kaitai::detail::ParsedField;
+using kaitai::detail::Parser;
+
+namespace Commands
+{
+    constexpr int OPEN_FILE_TO_PARSE             = 0x01;
+    static KeyboardControl OpenBinaryFileCommand = { Input::Key::F6, "OpenBinaryFile", "Open the binary file to parse", OPEN_FILE_TO_PARSE };
+} // namespace Commands
+
 struct SettingsData {
-    int analysisLevel = 0;
-    SettingsData();
+    KaitaiStruct format{};
+
+    SettingsData() = default;
 };
 
 struct Config {
@@ -40,6 +57,11 @@ private:
     void SetCustomPropertyValue(uint32 propertyID) override;
     bool IsPropertyValueReadOnly(uint32 propertyID) override;
     const vector<Property> GetPropertiesList() override;
+
+    void Paint(Graphics::Renderer& renderer) override;
+    bool OnUpdateCommandBar(Application::CommandBar& commandBar) override;
+    bool UpdateKeys(KeyboardControlsInterface*) override;
+    bool OnEvent(Reference<Control> sender, Event eventType, int controlID) override;
 };
 
 } // namespace GView::View::KaitaiViewer

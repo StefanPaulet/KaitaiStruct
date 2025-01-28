@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <format>
 #include <string>
 #include <variant>
 #include <vector>
@@ -23,6 +24,7 @@ struct Chunk {
   std::variant<Size, Constant, RawType> data;
 };
 
+
 class Sequence {
 public:
   auto addChunk(Chunk&& chunk) -> void;
@@ -39,4 +41,33 @@ struct CompoundType {
   Sequence seq;
 };
 } // namespace kaitai::detail
+
+
+template <> struct std::formatter<kaitai::detail::Chunk::RawType> {
+  using Type = kaitai::detail::Chunk::RawType;
+
+  constexpr auto parse(auto& ctx) {
+    auto it = ctx.begin();
+    if (it == ctx.end()) {
+      return it;
+    }
+    if (it != ctx.end() && *it != '}') {
+      throw std::format_error("Invalid format args for RawType.");
+    }
+
+    return it;
+  }
+
+  auto format(Type type, format_context& ctx) const {
+    using namespace kaitai::detail;
+    auto toString = [](Type t) -> std::string {
+      switch (t) {
+        using enum Type;
+        case U1: { return "unsigned char"; }
+        case U2: { return "unsigned short int"; }
+      }
+    };
+    return formatter<std::string>{}.format(toString(type), ctx);
+  }
+};
 

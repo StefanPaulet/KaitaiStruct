@@ -25,7 +25,6 @@ using namespace AppCUI;
 #else
 #    define PLUGIN_EXPORT
 #endif
-
 namespace GView
 {
 struct CORE_EXPORT KeyboardControl {
@@ -1012,9 +1011,10 @@ namespace View
             SettingsData* _data;
 
             Settings();
-            void setAnalysisLevel(int level) const;
+            void SetKaitaiFormat(std::string_view data) const;
+            std::vector<std::tuple<std::string, std::string>> GetBinaryData(std::ifstream& istream) const;
         };
-    }; // namespace ImageViewer
+    }; // namespace KaitaiViewer
 
     namespace ContainerViewer
     {
@@ -1494,7 +1494,7 @@ namespace View
         virtual bool CreateViewer(TextViewer::Settings& settings)      = 0;
         virtual bool CreateViewer(ContainerViewer::Settings& settings) = 0;
         virtual bool CreateViewer(LexicalViewer::Settings& settings)   = 0;
-        virtual bool CreateViewer(KaitaiViewer::Settings& settings)   = 0;
+        virtual bool CreateViewer(KaitaiViewer::Settings& settings)    = 0;
         virtual Reference<ViewControl> GetCurrentView()                = 0;
         virtual uint32 GetViewsCount()                                 = 0;
         virtual Reference<ViewControl> GetViewByIndex(uint32 index)    = 0;
