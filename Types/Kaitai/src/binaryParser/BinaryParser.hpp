@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <array>
 #include <iostream>
+#include <span>
 #include <type_traits>
 
 namespace kaitai::detail {
@@ -21,7 +22,7 @@ class BinaryParser {
 public:
   using InputStream = std::basic_istream<char>;
 
-  explicit BinaryParser(KaitaiStruct&& format) :
+  explicit BinaryParser(KaitaiStruct const& format) :
     _format{std::move(format)}, _endian{_format.getMeta().endian} {};
 
   auto operator()(InputStream& istream) const -> ParsedBinary;
@@ -44,7 +45,7 @@ private:
     return {view.data(), size};
   }
 
-  KaitaiStruct _format;
+  KaitaiStruct const& _format;
   Endian _endian;
 };
 

@@ -27,8 +27,8 @@ types:
   Parser parser {str};
   try {
     auto kstruct = parser();
-    BinaryParser binaryParser{std::move(kstruct)};
-    std::stringstream test{"T1abcde"};
+    BinaryParser binaryParser{kstruct};
+    std::stringstream test{"T1abc\x64\x65"};
     auto result = binaryParser(test);
     auto field = std::get<ParsedField::CompoundData>(result.fields.front().value);
     std::cout << std::get<bool>(field[0].value) << '\n';
