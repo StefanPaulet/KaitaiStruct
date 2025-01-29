@@ -125,6 +125,14 @@ auto Lexer::handleWhitespace(std::string_view input) -> std::tuple<std::string_v
       input.remove_prefix(1);
       return {input, Token{NewLine}};
     }
+    case '\r': {
+      input.remove_prefix(1);
+      if (input.front() != '\n') {
+        return {input, std::nullopt};
+      }
+      input.remove_prefix(1);
+      return {input, Token{NewLine}};
+    }
     default: {
       assert(false && "Unhandled whitespace symbol");
     }

@@ -1,0 +1,7 @@
+//
+// Created by stefan on 1/272025.
+//
+
+#pragma once
+
+#include "../../src/binaryParser/BinaryParser.hpp"

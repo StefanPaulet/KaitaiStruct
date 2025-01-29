@@ -16,7 +16,7 @@ auto Parser::operator()() -> KaitaiStruct {
     auto sequence = parseSequence();
     TypesMap compoundTypes {};
     for (auto const& chunk : sequence) {
-      compoundTypes.emplace(std::get<1>(chunk).name, CompoundType{});
+      compoundTypes.emplace(std::get<1>(chunk), CompoundType{});
     }
     kaitaiStruct.setSequence(sequence);
 
@@ -182,7 +182,7 @@ auto Parser::consumeSeqItem(unsigned int indent) noexcept(false) -> std::variant
         it != _rawTypes.end()) {
         return Chunk{typeName, it->second};
       }
-      return KaitaiStruct::NamedType{typeName, CompoundType{std::get<std::string>(data), {}}};
+      return KaitaiStruct::NamedType{typeName, std::get<std::string>(data)};
     }
     case Contents: {
       return Chunk{typeName, std::get<std::string>(data)};
